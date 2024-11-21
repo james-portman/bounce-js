@@ -1,0 +1,116 @@
+<html>
+<head>
+<style>
+#wrapper {
+  position: relative;
+}
+#big {
+  position: absolute;
+  top: 0;
+  height: 200px;
+  background: red;
+}
+#small {
+  position: absolute;
+  top: 0;
+  height: 100px;
+  background: black;
+}
+</style>
+</head>
+<body>
+<div>
+  Collisions:
+  <span id="numCollisions"></span>
+</div>
+<div id="wrapper">
+  <div id="small"></div>
+  <div id="big"></div>
+</div>
+
+<script>
+var big = {
+  x: 800,
+  width: 200,
+  mass: 10000,
+  velocity: -1000
+};
+var small = {
+  x: 600,
+  width: 100,
+  mass: 1,
+  velocity: 0
+};
+
+const frameRate = 1000;
+
+var bigDiv = document.getElementById("big");
+bigDiv.style.width = big.width;
+var smallDiv = document.getElementById("small");
+smallDiv.style.width = small.width;
+
+function draw() {
+  bigDiv.style.left = big.x;
+  smallDiv.style.left = small.x;
+}
+
+var blocksColliding = false;
+var collisions = 0; // blocks and left wall
+
+
+function update() {
+  // redo movement logic to be /ths of movement based on frame rate but basic for now
+
+  // move them
+  var bigNewX = big.x + (big.velocity / frameRate);
+  if (bigNewX < 0) { bigNewX = 0; } // TODO: make velocity reverse
+  big.x = bigNewX;
+
+  var smallNewX = small.x + (small.velocity / frameRate);
+  if (smallNewX < 0) { smallNewX = 0; } // TODO: make velocity reverse
+  small.x = smallNewX;
+
+  if (smallNewX == 0 && small.velocity < 0) {
+    increaseCollisions();
+    small.velocity = -small.velocity;
+  }
+
+  // detect collision
+  // will always be small on the left, big on the right
+
+  // this is maybe wrong to do/assume, just need to keep them where they are/stop overlap
+
+
+  if (big.x <= small.x + small.width) {
+
+    increaseCollisions();
+
+    // affect each other
+
+    // fix the logic of +/- velocity
+    var bigNewV = (big.mass - small.mass)*(big.velocity) + 2*small.mass*(small.velocity);
+    bigNewV /= (big.mass + small.mass);
+
+    var smallNewV = (small.mass - big.mass)*(small.velocity) + 2*big.mass*(big.velocity);
+    smallNewV /= (small.mass + big.mass);
+
+    big.velocity = bigNewV;
+    small.velocity = smallNewV;
+  }
+
+
+  draw();
+  setTimeout(update, (1000/frameRate));
+}
+
+var numCollisionsDiv = document.getElementById("numCollisions");
+function increaseCollisions() {
+  collisions++;
+  numCollisionsDiv.innerText = collisions;
+}
+
+draw();
+update();
+</script>
+</body>
+</html>
